@@ -25,6 +25,8 @@ int pinG = 8;
 MicroDS3231 rtc;
 
 void setup() {
+  Serial.begin(9600);
+
   pinMode(D1, OUTPUT);
   pinMode(D2, OUTPUT);
   pinMode(D3, OUTPUT);
@@ -37,25 +39,82 @@ void setup() {
   pinMode(pinF, OUTPUT);
   pinMode(pinG, OUTPUT);
 
-  rtc.setTime(COMPILE_TIME);
-  Serial.begin(9600);
+  //rtc.setTime(COMPILE_TIME);
+
+  DateTime now = rtc.getTime();
+  rtc.setTime(now);
 
   uploading();
 }
 
 void loop() {
-  auto hours = rtc.getHours();
-  auto h1 = String(hours)[0];
-  auto h2 = String(hours)[1];
+  DateTime now = rtc.getTime();
 
-  auto minutes = rtc.getMinutes();
-  auto m1 = String(minutes[0]);
-  auto m2 = String(minutes[1]);
+  Serial.print(now.hour);
+  Serial.print(" ");
+  Serial.println(now.minute);
 
-  digit1();two();delay(5);
-  digit2();two();delay(5);
-  digit3();three();delay(5);
-  digit4();four();delay(5);
+  // auto hours = rtc.getHours();
+  // int h1 = String(hours)[0];
+  // int h2 = String(hours)[1];
+
+  // auto minutes = rtc.getMinutes();
+  // int m1 = String(minutes)[0];
+  // int m2 = String(minutes)[1];
+  int h1 = String(now.hour)[0];
+  int h2 = String(now.hour)[1];
+  int m1 = String(now.minute)[0];
+  int m2 = String(now.minute)[1];
+  if(now.minute < 10){
+    int m1 = 0;
+    int m2 = String(now.minute)[1];
+  }else if(now.minute >= 10 and now.minute < 60){
+    int m1 = String(now.minute)[0];
+    int m2 = String(now.minute)[1];
+  }
+
+  digit1();whichNum(h1);delay(5);
+  digit2();whichNum(h2);delay(5);
+  digit3();whichNum(m1);delay(5);
+  digit4();whichNum(m2);delay(5);
+}
+
+void whichNum(int number){
+  switch(number){
+    case 48:
+      zero();
+      break;
+    case 49:
+      one();
+      break;
+    case 50:
+      two();
+      break;
+    case 51:
+      three();
+      break;
+    case 52:
+      four();
+      break;
+    case 53:
+      five();
+      break;
+    case 54:
+      six();
+      break;
+    case 55:
+      seven();
+      break;
+    case 56:
+      eight();
+      break;
+    case 57:
+      nine();
+      break;
+    default:
+      uploading();
+      break;
+  }
 }
 
 void zero() {
@@ -152,7 +211,7 @@ void nine() {
   digitalWrite(pinA, HIGH);
   digitalWrite(pinB, HIGH);
   digitalWrite(pinC, HIGH);
-  digitalWrite(pinD, LOW);
+  digitalWrite(pinD, HIGH);
   digitalWrite(pinE, LOW);
   digitalWrite(pinF, HIGH);
   digitalWrite(pinG, HIGH);
@@ -161,9 +220,10 @@ void nine() {
 void uploading() {
   digitalWrite(pinF, LOW);
   digitalWrite(pinG, HIGH);
-  delay(1000);
+  delay(300);
   digitalWrite(pinF, LOW);
   digitalWrite(pinG, HIGH);
+  delay(300);
 }
 
 
