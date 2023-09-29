@@ -22,11 +22,18 @@ int pinE = 6;
 int pinF = 7;
 int pinG = 8;
 
+int pinLed = 13;
+int pinButton = 11;
+
+int cnt = 0;
+
+byte a[4];
+
+bool power = false;
+
 MicroDS3231 rtc;
 
 void setup() {
-  Serial.begin(9600);
-
   pinMode(D1, OUTPUT);
   pinMode(D2, OUTPUT);
   pinMode(D3, OUTPUT);
@@ -39,76 +46,102 @@ void setup() {
   pinMode(pinF, OUTPUT);
   pinMode(pinG, OUTPUT);
 
-  //rtc.setTime(COMPILE_TIME);
+  pinMode(pinLed, OUTPUT);
+  pinMode(pinButton, INPUT);
 
-  DateTime now = rtc.getTime();
-  rtc.setTime(now);
+  digitalWrite(pinLed, LOW);
 
-  uploading();
+  if (rtc.lostPower()) {
+    rtc.setTime(COMPILE_TIME);
+  }
+
+  Serial.begin(9600);
 }
 
 void loop() {
+
+  // int acc = analogRead(A0);
+  // Serial.println(acc * 100 / 1023);
+
   DateTime now = rtc.getTime();
 
-  Serial.print(now.hour);
-  Serial.print(" ");
-  Serial.println(now.minute);
+  int times = now.hour * 100 + now.minute;
+  
+  a[0] = times / 1000;
+  a[1] = times / 100 % 10;
+  a[2] = times / 10 % 10;
+  a[3] = times % 10 % 10;
 
-  // auto hours = rtc.getHours();
-  // int h1 = String(hours)[0];
-  // int h2 = String(hours)[1];
-
-  // auto minutes = rtc.getMinutes();
-  // int m1 = String(minutes)[0];
-  // int m2 = String(minutes)[1];
-  int h1 = String(now.hour)[0];
-  int h2 = String(now.hour)[1];
-  int m1 = String(now.minute)[0];
-  int m2 = String(now.minute)[1];
-  if(now.minute < 10){
-    int m1 = 0;
-    int m2 = String(now.minute)[1];
-  }else if(now.minute >= 10 and now.minute < 60){
-    int m1 = String(now.minute)[0];
-    int m2 = String(now.minute)[1];
+  if(power == true){
+    while(cnt != 3000){
+      digit1();whichNum(int(a[0]));checkLedBtn();delay(5);
+      digit2();whichNum(int(a[1]));checkLedBtn();delay(5);
+      digit3();whichNum(int(a[2]));checkLedBtn();delay(5);
+      digit4();whichNum(int(a[3]));checkLedBtn();delay(5);
+      Serial.println(cnt);
+      cnt += 10;
+    }
+    powerOff();
+  }else{
+    powerOff();
   }
+  checkPowerBtn();
+  // Serial.print(int(a[0]));
+  // Serial.print(":");
+  // Serial.print(int(a[1]));
+  // Serial.print(":");
+  // Serial.print(int(a[2]));
+  // Serial.print(":");
+  // Serial.println(int(a[3]));
+}
 
-  digit1();whichNum(h1);delay(5);
-  digit2();whichNum(h2);delay(5);
-  digit3();whichNum(m1);delay(5);
-  digit4();whichNum(m2);delay(5);
+void checkPowerBtn(){
+  if(digitalRead(pinButton) == HIGH){
+    if(power == false){
+      cnt = 0;
+      power = true;
+    }
+  }
+}
+
+void checkLedBtn(){
+  if(digitalRead(pinButton) == HIGH){
+    digitalWrite(pinLed, HIGH); 
+  }else{
+    digitalWrite(pinLed, LOW);
+  }
 }
 
 void whichNum(int number){
   switch(number){
-    case 48:
+    case 0:
       zero();
       break;
-    case 49:
+    case 1:
       one();
       break;
-    case 50:
+    case 2:
       two();
       break;
-    case 51:
+    case 3:
       three();
       break;
-    case 52:
+    case 4:
       four();
       break;
-    case 53:
+    case 5:
       five();
       break;
-    case 54:
+    case 6:
       six();
       break;
-    case 55:
+    case 7:
       seven();
       break;
-    case 56:
+    case 8:
       eight();
       break;
-    case 57:
+    case 9:
       nine();
       break;
     default:
@@ -220,10 +253,10 @@ void nine() {
 void uploading() {
   digitalWrite(pinF, LOW);
   digitalWrite(pinG, HIGH);
-  delay(300);
+  delay(100);
   digitalWrite(pinF, LOW);
   digitalWrite(pinG, HIGH);
-  delay(300);
+  delay(100);
 }
 
 
@@ -261,4 +294,12 @@ void all4Digits() {
   digitalWrite(D2, LOW);
   digitalWrite(D3, LOW);
   digitalWrite(D4, LOW);
+}
+
+void powerOff() {
+  digitalWrite(D1, HIGH);
+  digitalWrite(D2, HIGH);
+  digitalWrite(D3, HIGH);
+  digitalWrite(D4, HIGH);
+  power = false;
 }
