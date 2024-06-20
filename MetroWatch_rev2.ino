@@ -70,6 +70,7 @@ void loop() {
   checkButtonInput();
 }
 
+// FUCKING BUTTONS. THIS IS BULLSHIT WHICH DOES NOT WORK. FUCKK!
 void checkButtonInput(){
   btnAState = !digitalRead(pinButtonA);
   btnBState = !digitalRead(pinButtonB);	
